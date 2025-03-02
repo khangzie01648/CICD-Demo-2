@@ -1,0 +1,34 @@
+name: CI/CD for DateTimeChecker
+# Khi nào pipeline chạy
+on:
+  push:
+    branches: [ main ]
+  pull_request: # branch gì đó --> main, phải cấu hình trên git hub
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Máy ảo chạy pipeline, or docker, windows, macos
+
+    steps:
+      # 1. Checkout mã nguồn
+      - uses: actions/checkout@v4
+
+      # 2. Cài đặt Java (phiên bản phù hợp với dự án của bạn)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'  # Thay đổi nếu bạn dùng phiên bản khác
+          distribution: 'adopt'
+
+      # 3. Cài đặt dependencies và chạy test
+      - name: Build and Test with Maven
+        run: mvn clean test
+
+      # 4. (Tùy chọn) Báo cáo kết quả test
+      - name: Upload Test Results
+        if: always()  # Chạy kể cả khi test fail
+        uses: actions/checkout@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
